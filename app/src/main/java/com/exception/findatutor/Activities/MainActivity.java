@@ -1,5 +1,6 @@
 package com.exception.findatutor.Activities;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -39,7 +40,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,12 +63,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Bundle dataBundle;
     private String username;
     private MongoDB mongoDB;
-    private List<UserInfo> alluserInfos;
+    private List<TutorInfoNotification> alluserInfos;
     private ArrayList<String> allUserUsernames;
     private boolean first_time = true;
     private boolean done = true;
     private boolean busy = false;
-
+    public static int count = 1;
+    private Marker myMarker;
+    private Intent intent1 = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dataBundle = getIntent().getExtras();
         username = dataBundle.getString("username");
         Toast.makeText(MainActivity.this, "Username is: " + username, Toast.LENGTH_SHORT).show();
+        if (count == 1)
+            ThreadNotification.getInstance(getApplicationContext(), username).start();
         new CheckNotification().execute();
 
     }
@@ -156,11 +163,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_profile) {
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-            Bundle dataBundle = new Bundle();
-            dataBundle.putString("username", username);
-            intent.putExtras(dataBundle);
-            startActivity(intent);
+            new ProfileChoosing().execute();
+
+
         } else if (id == R.id.nav_map) {
             DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);
@@ -183,6 +188,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+
+    private class ProfileChoosing extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Bundle dataBundle = new Bundle();
+            dataBundle.putString("username", username);
+            if (intent1 != null) {
+                intent1.putExtras(dataBundle);
+                startActivity(intent1);
+            }
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (mongoDB.CheckRegisteringAsForNotification(username).equals("tutor")) {
+                intent1 = new Intent(MainActivity.this, ProfileActivity.class);
+            }
+            else if (mongoDB.CheckRegisteringAsForNotification(username).equals("student")) {
+                intent1 = new Intent(MainActivity.this, StudentProfile.class);
+            }
+            return null;
+        }
+    }
 
     protected void InitializeGoogleAPIClient() {
         if (mGoogleApiClient == null) {
@@ -222,6 +251,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         lng = Double.toString(location.getLongitude());
         //Toast.makeText(MainActivity.this, "lat is: " + lat + " lng is : " + lng, Toast.LENGTH_SHORT).show();
         //System.out.println("lat is: " + lat + " lng is : " + lng );
+        myMarker= GoogleMap.addMarker(new MarkerOptions()
+                .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                .title("You are here!"));
         if (!busy) {
             busy = true;
             new UpdateLocationOnLocationChanged().execute();
@@ -240,9 +272,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             try {
 
                 if (mongoDB.CheckRegisteringAsForNotification(username).equals("tutor")) {
-                    if (mongoDB.CheckTutorNotification(username, true).equals("sent")) {
-                        NotificationGenerator("Wants to connect", "Hey I want to contact");
-                        mongoDB.UpdateTheTutorNOtification(username, "false");
+                    if (mongoDB.CheckTutorNotification(username, "true").equals("sent")) {
+                        NotificationGenerator("Student Wants to connect", "Click to view profile", StudentProfile.class,
+                                mongoDB.TutorNotificationSenderName(LoginActivity.uname));
+//                        mongoDB.UpdateTheStudentNOtification(mongoDB.TutorNotificationSenderName(LoginActivity.uname),
+//                                "accepted", LoginActivity.uname);
+//                        mongoDB.UpdateTheTutorNOtification(username, "accepted", LoginActivity.uname);
+
+                    }
+                }
+                if (mongoDB.CheckRegisteringAsForNotification(username).equals("student")) {
+                    if (mongoDB.CheckStudentNotification(username, "accepted").equals("accepted")) {
+                        NotificationGenerator("Tutor has accepted your request", "Click to view full profile", ProfileActivity.class,
+                                mongoDB.StudentNotificationSenderName(LoginActivity.uname));
+                        mongoDB.UpdateTheTutorNOtification(mongoDB.StudentNotificationSenderName(LoginActivity.uname), "false", null);
+                        mongoDB.UpdateTheStudentNOtification(username, "false", null);
                     }
                 }
             } catch (Exception e) {
@@ -252,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void NotificationGenerator(String title, String message) {
+    private void NotificationGenerator(String title, String message, final Class<? extends Activity> ActivityToOpen, String username) {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(MainActivity.this)
@@ -260,9 +304,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                         .setContentTitle(title)
                         .setContentText(message);
-        Intent resultIntent = new Intent(MainActivity.this, CardProfile.class);
+        Intent resultIntent = new Intent(MainActivity.this, ActivityToOpen);
+        resultIntent.putExtra("username", username);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(MainActivity.this);
-        stackBuilder.addParentStack(CardProfile.class);
+        stackBuilder.addParentStack(ActivityToOpen);
         stackBuilder.addNextIntent(resultIntent);
 
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);

@@ -1,6 +1,7 @@
 package com.exception.findatutor.conn;
 
-import com.exception.findatutor.Activities.Tutorinfo;
+import com.exception.findatutor.Activities.TutorInfoFull;
+import com.exception.findatutor.Activities.UserTableInfoFull;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -49,10 +50,10 @@ public class MongoDB extends ConnFields {
         return mongoDatabase.getCollection(COLLECTION_LOCATION);
     }
 
-    public void showUsers(ArrayList<String> allUserUsernames, List<Tutorinfo> alluserInfos) {
+    public void showUsers(ArrayList<String> allUserUsernames, List<TutorInfoFull> alluserInfos) {
         for (Iterator<Document> iterator = ((Iterable<Document>) mongoDatabase.getCollection(COLLECTION).find()).iterator(); iterator.hasNext(); ) {
             Document doc = iterator.next();
-            alluserInfos.add(new Tutorinfo(doc.get("name").toString(), doc.get("edu").toString(), doc.get("edu").toString(), doc.get("courses").toString(),
+            alluserInfos.add(new TutorInfoFull(doc.get("name").toString(), doc.get("edu").toString(), doc.get("edu").toString(), doc.get("courses").toString(),
                     doc.get("fee").toString(), doc.get("from").toString(), doc.get("to").toString(),
                     doc.get("lat").toString(), doc.get("lng").toString(), doc.get("notification").toString()));
             allUserUsernames.add(doc.get("name").toString());
@@ -66,14 +67,21 @@ public class MongoDB extends ConnFields {
         mongoDatabase.getCollection(COLLECTION_LOCATION).updateOne(searchQuery, newDocument);
     }
 
-    public void UpdateTheTutorNOtification(String uname, String NotificationBoolean) {
+    public void UpdateTheTutorNOtification(String uname, String NotificationBoolean, String loginuser) {
         BasicDBObject newDocument = new BasicDBObject();
-        newDocument.append("$set", new BasicDBObject().append("notification", NotificationBoolean));
+        newDocument.append("$set", new BasicDBObject().append("sender", loginuser).append("notification", NotificationBoolean));
         BasicDBObject searchQuery = new BasicDBObject().append("name", uname);
         mongoDatabase.getCollection(COLLECTION_TUTORS).updateOne(searchQuery, newDocument);
     }
 
-    public String CheckTutorNotification(String uname, Boolean NotificationBoolean) {
+    public void UpdateTheStudentNOtification(String uname, String NotificationBoolean, String loginuser) {
+        BasicDBObject newDocument = new BasicDBObject();
+        newDocument.append("$set", new BasicDBObject().append("sender", loginuser).append("notification", NotificationBoolean));
+        BasicDBObject searchQuery = new BasicDBObject().append("uname", uname);
+        mongoDatabase.getCollection(COLLECTION).updateOne(searchQuery, newDocument);
+    }
+
+    public String CheckTutorNotification(String uname, String NotificationBoolean) {
         MongoCursor<Document> mongoCursor = mongoDatabase.getCollection(COLLECTION_TUTORS)
                 .find(or(eq("name", uname))).iterator();
         Document elem;
@@ -83,7 +91,35 @@ public class MongoDB extends ConnFields {
                 if ((elem.get("notification").toString().equals("true"))) {
 
                     return "sent";
-                } else {
+                }
+                if ((elem.get("notification").toString().equals("accepted"))) {
+
+                    return "accepted";
+                }
+                else {
+                    return "notsent";
+                }
+            }
+        }
+        return "notsent";
+    }
+
+    public String CheckStudentNotification(String uname, String NotificationBoolean) {
+        MongoCursor<Document> mongoCursor = mongoDatabase.getCollection(COLLECTION)
+                .find(or(eq("uname", uname))).iterator();
+        Document elem;
+        if (mongoCursor.hasNext()) {
+            elem = mongoCursor.next();
+            if (((elem.get("uname")).toString().equals(uname))) {
+                if ((elem.get("notification").toString().equals("true"))) {
+
+                    return "sent";
+                }
+                if ((elem.get("notification").toString().equals("accepted"))) {
+
+                    return "accepted";
+                }
+                else {
                     return "notsent";
                 }
             }
@@ -123,15 +159,41 @@ public class MongoDB extends ConnFields {
         return "student";
     }
 
-    public ArrayList<Tutorinfo> retrieveTutorDataList() {
-
-        ArrayList<Tutorinfo> arrayListTutors = new ArrayList<>();
+    public String TutorNotificationSenderName(String tutorname){
+        String sender = "";
         MongoCursor<Document> dbCursor = mongoDatabase.getCollection(COLLECTION_TUTORS).find().projection(excludeId()).iterator();
 
         Document elem;
         while (dbCursor.hasNext()) {
             elem = dbCursor.next();
-            arrayListTutors.add(new Tutorinfo(elem.get("name").toString(), elem.get("edu").toString(), elem.get("edu").toString(), elem.get("courses").toString(),
+            if (((elem.get("name")).toString().equals(tutorname)))
+            sender = elem.get("sender").toString();
+        }
+        return sender;
+    }
+
+    public String StudentNotificationSenderName(String tutorname){
+        String sender = "";
+        MongoCursor<Document> dbCursor = mongoDatabase.getCollection(COLLECTION).find().projection(excludeId()).iterator();
+
+        Document elem;
+        while (dbCursor.hasNext()) {
+            elem = dbCursor.next();
+            if (((elem.get("uname")).toString().equals(tutorname)))
+                sender = elem.get("sender").toString();
+        }
+        return sender;
+    }
+
+    public ArrayList<TutorInfoFull> retrieveTutorDataList() {
+
+        ArrayList<TutorInfoFull> arrayListTutors = new ArrayList<>();
+        MongoCursor<Document> dbCursor = mongoDatabase.getCollection(COLLECTION_TUTORS).find().projection(excludeId()).iterator();
+
+        Document elem;
+        while (dbCursor.hasNext()) {
+            elem = dbCursor.next();
+            arrayListTutors.add(new TutorInfoFull(elem.get("name").toString(), elem.get("edu").toString(), elem.get("edu").toString(), elem.get("courses").toString(),
                     elem.get("fee").toString(), elem.get("from").toString(), elem.get("to").toString(),
                     elem.get("lat").toString(), elem.get("lng").toString(), elem.get("notification").toString()));
         }
@@ -147,6 +209,45 @@ public class MongoDB extends ConnFields {
         while (dbCursor.hasNext()) {
             elem = dbCursor.next();
             arrayListTutors.add(elem.get("name").toString());
+        }
+        return arrayListTutors;
+    }
+
+    public ArrayList<TutorInfoFull> retrieveOneTutorData(String username) {
+        ArrayList<TutorInfoFull> arrayListTutors = new ArrayList<>();
+        MongoCursor<Document> dbCursor = mongoDatabase.getCollection(COLLECTION_TUTORS).find(or(eq("name", username))).iterator();
+
+        Document elem;
+        if (dbCursor.hasNext()) {
+            elem = dbCursor.next();
+            if (((String) elem.get("name")).equals(username)) {
+                arrayListTutors.add(new TutorInfoFull(elem.get("name").toString(), elem.get("edu").toString(), elem.get("exp").toString(), elem.get("courses").toString(),
+                        elem.get("fee").toString(), elem.get("from").toString(), elem.get("to").toString(),
+                        elem.get("lat").toString(), elem.get("lng").toString(), elem.get("notification").toString()));
+                return arrayListTutors;
+            }
+
+        }
+        return arrayListTutors;
+    }
+
+    public ArrayList<UserTableInfoFull> RetrieveOtherInfoFromUserTable(String username) {
+        ArrayList<UserTableInfoFull> arrayListTutors = new ArrayList<>();
+        MongoCursor<Document> dbCursor = mongoDatabase.getCollection(COLLECTION).find(or(eq("uname", username))).iterator();
+
+        Document elem;
+
+        if (dbCursor.hasNext()) {
+            elem = dbCursor.next();
+            if (((String) elem.get("uname")).equals(username)) {
+                arrayListTutors.add(new UserTableInfoFull(
+                        elem.get("uname").toString(),
+                        elem.get("email").toString(),
+                        elem.get("phoneno").toString(),
+                        elem.get("occupation").toString(),
+                        elem.get("city").toString(),
+                        elem.get("age").toString()));
+            }
         }
         return arrayListTutors;
     }
@@ -253,11 +354,3 @@ public class MongoDB extends ConnFields {
 
     }
 }
-
-
-//                registeringAs = (String) mongoCursor.next().get("resgisteringAs");
-//                occupation = (String) mongoCursor.next().get("occupation");
-//                city = (String) mongoCursor.next().get("city");
-//                phoneno = (String) mongoCursor.next().get("phoneno");
-//                age = (String) mongoCursor.next().get("age");
-

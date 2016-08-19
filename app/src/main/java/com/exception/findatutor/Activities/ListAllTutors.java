@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -110,13 +112,32 @@ public class ListAllTutors extends Fragment {
 
         public MyViewHolder(View v) {
             super(v);
+            LinearLayout linear = (LinearLayout)v.findViewById(R.id.linearlayoutfull);
             titleTextView = (TextView) v.findViewById(R.id.tv_card_name);
             titleCourseView = (TextView) v.findViewById(R.id.tv_subject_card);
             titleFeeView = (TextView) v.findViewById(R.id.tv_fee_card);
             coverImageView = (ImageView) v.findViewById(R.id.coverImageView);
             likeImageView = (ImageView) v.findViewById(R.id.likeImageView);
-//                shareImageView = (ImageView) v.findViewById(R.id.shareImageView);
-            coverImageView.setOnClickListener(new View.OnClickListener() {
+
+            likeImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Snackbar snackbar = Snackbar
+                            .make(view, "Added to favourites", Snackbar.LENGTH_LONG)
+                            .setAction("UNDO", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Snackbar snackbar1 = Snackbar.make(view, "Removed from favourites!", Snackbar.LENGTH_SHORT);
+                                    snackbar1.show();
+                                }
+                            });
+
+                    snackbar.show();
+
+                }
+            });
+
+            linear.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
@@ -129,7 +150,8 @@ public class ListAllTutors extends Fragment {
                     dataBundle.putParcelable("image", image);
 
                     dataBundle.putString("title", titleTextView.getText().toString());
-                    dataBundle.putString("age", titleCityView.getText().toString());
+                    dataBundle.putString("courses", titleCourseView.getText().toString());
+                    dataBundle.putString("fee", titleFeeView.getText().toString());
                     intent.putExtras(dataBundle);
                     v.getContext().startActivity(intent);
 
@@ -138,10 +160,10 @@ public class ListAllTutors extends Fragment {
         }
     }
 
-    private class FetchListOfTutors extends AsyncTask<Object, Object, ArrayList<Tutorinfo>> {
+    private class FetchListOfTutors extends AsyncTask<Object, Object, ArrayList<TutorInfoFull>> {
 
         @Override
-        protected ArrayList<Tutorinfo> doInBackground(Object... params) {
+        protected ArrayList<TutorInfoFull> doInBackground(Object... params) {
             try {
                 return mongoDB.retrieveTutorDataList();
             } catch (Exception e) {
@@ -151,9 +173,9 @@ public class ListAllTutors extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(ArrayList<Tutorinfo> result) {
+        protected void onPostExecute(ArrayList<TutorInfoFull> result) {
             initializeList(result);
-            for (Tutorinfo alluser : result) {
+            for (TutorInfoFull alluser : result) {
                 System.out.println("Name - " + alluser.getTutorName() +
                         "Latitude - " + alluser.getLat() +
                         "Longitude - " + alluser.getLng() +
@@ -163,10 +185,10 @@ public class ListAllTutors extends Fragment {
     }
 
 
-    public void initializeList(ArrayList<Tutorinfo> result) {
+    public void initializeList(ArrayList<TutorInfoFull> result) {
         listitems.clear();
 
-        for (Tutorinfo alluser : result) {
+        for (TutorInfoFull alluser : result) {
             TutorCards item = new TutorCards();
             item.setTutorName(alluser.getTutorName());
             item.setCourses(alluser.getCourses());

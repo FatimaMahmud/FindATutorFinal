@@ -156,7 +156,7 @@
                     android:inputType="phone"
                     android:textColorHint="@color/blue" />
 
-                <EditText
+                <AutoCompleteTextView
                     android:id="@+id/etcity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -247,6 +247,14 @@
                     android:scrollbars="vertical"
                     android:weightSum="3">
 
+                    <TextView
+                        android:id="@+id/invalid"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_weight="1"
+                        android:text=""
+                        android:textColor="@color/colorAccent" />
 
                     <Button
                         android:id="@+id/btRegister"

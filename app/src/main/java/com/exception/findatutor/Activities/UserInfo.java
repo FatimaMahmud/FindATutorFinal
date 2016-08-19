@@ -5,52 +5,29 @@ package com.exception.findatutor.Activities;
  * conversation message.
  */
 public class UserInfo {
-    private String uname;
+    private String name;
     private String lat;
     private String lng;
     private String status;
     private String gender;
     private String age;
-    private String notification;
 
 
-    public UserInfo(String uname, String lat, String lng, String notification) {
-        this.uname = uname;
+    public UserInfo(String name, String lat, String lng) {
+        this.name = name;
         this.lat = lat;
         this.lng = lng;
-        this.notification = notification;
         this.status = status;
         this.gender = gender;
         this.age = age;
     }
 
-    public String getName() {
-        return uname;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getLat() {
-        return lat;
-    }
-
-    public String getLng() {
-        return lng;
-    }
-
-    public String getNotification() {
-        return notification;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public String getAge() {
-        return age;
-    }
+    public String getName() {return name;}
+    public String getStatus() {return status;}
+    public String getLat() {return lat;}
+    public String getLng() {return lng;}
+    public String getGender() {return gender;}
+    public String getAge() {return age;}
 
 }
 

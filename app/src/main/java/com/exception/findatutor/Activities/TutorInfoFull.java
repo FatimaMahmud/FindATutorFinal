@@ -1,6 +1,6 @@
 package com.exception.findatutor.Activities;
 
-public class Tutorinfo {
+public class TutorInfoFull {
     private String name;
     private String edu;
     private String exp;
@@ -13,7 +13,7 @@ public class Tutorinfo {
     private String notification;
 
 
-    public Tutorinfo(String name, String edu, String exp, String courses, String fee, String from, String to, String lat, String lng, String notification) {
+    public TutorInfoFull(String name, String edu, String exp, String courses, String fee, String from, String to, String lat, String lng, String notification) {
         this.name = name;
         this.lat = lat;
         this.lng = lng;
@@ -54,10 +54,10 @@ public class Tutorinfo {
         return exp;
     }
 
+
     public String getFee() {
         return fee;
     }
-
     public String getFrom() {
         return from;
     }

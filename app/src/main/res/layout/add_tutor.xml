@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splash_background">
-
+    android:background="@drawable/splash_background"
+    >
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/tv_feecharges"
             android:layout_alignStart="@+id/tv_feecharges"
-            android:layout_below="@+id/radioGroup2"
+            android:layout_below="@+id/fee"
             android:layout_marginTop="11dp"
             android:text="Tutoring Timings" />
 
@@ -31,12 +31,12 @@
             android:layout_alignStart="@+id/radioGroup2"
             android:layout_below="@+id/textView23"
             android:layout_marginLeft="12dp"
+            android:focusable="false"
             android:layout_marginStart="12dp"
             android:layout_marginTop="6dp"
             android:ems="10"
-            android:inputType="time"
             android:hint="5:00"
-            android:textColor="@color/blue" />
+            android:textColor="@color/blue"/>
 
         <Button
             android:text="Save"
@@ -71,7 +71,7 @@
             android:layout_toEndOf="@+id/button2"
             android:layout_marginLeft="59dp"
             android:layout_marginStart="59dp"
-            android:textColor="@android:color/holo_red_dark" />
+            android:textColor="@android:color/holo_red_dark"/>
 
         <EditText
             android:layout_width="100dp"
@@ -80,6 +80,7 @@
             android:ems="10"
             android:id="@+id/editText6"
             android:hint="8:00"
+            android:focusable="false"
             android:layout_marginRight="16dp"
             android:textColor="@color/blue"
             android:layout_marginEnd="16dp"
@@ -156,22 +157,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/blue"
-                android:checked="true"
-                android:text="2000 Rs / $20" />
+                android:text="2000 Rs / $20"
+                />
 
             <RadioButton
                 android:id="@+id/radioButton1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="3000 Rs / $30"
-                android:textColor="@color/blue" />
+                android:textColor="@color/blue"/>
 
             <RadioButton
                 android:id="@+id/radioButton3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="4000 Rs / $40"
-                android:textColor="@color/blue" />
+                android:textColor="@color/blue"/>
+
         </RadioGroup>
 
         <EditText
@@ -180,10 +182,24 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textMultiLine"
-            android:hint="Education"
+            android:hint="Education (With Instituition)"
             android:textColor="@color/blue"
             android:layout_marginTop="15dp"
             android:layout_below="@+id/editText2"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+
+        <EditText
+            android:id="@+id/fee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:ems="10"
+            android:inputType="text"
+            android:hint="Custom charges"
+            android:textColor="@color/blue"
+            android:layout_below="@+id/radioGroup2"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
 
