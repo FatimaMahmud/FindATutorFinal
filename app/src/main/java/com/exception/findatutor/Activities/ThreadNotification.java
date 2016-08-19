@@ -73,6 +73,7 @@ public class ThreadNotification extends Thread {
                         .setContentText(message);
         Intent resultIntent = new Intent(context, ActivityToOpen);
         resultIntent.putExtra("username", username);
+        resultIntent.putExtra("state", "card");
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(ActivityToOpen);
         stackBuilder.addNextIntent(resultIntent);

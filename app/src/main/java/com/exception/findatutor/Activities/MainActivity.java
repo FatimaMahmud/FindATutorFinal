@@ -195,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         protected void onPostExecute(Void aVoid) {
             Bundle dataBundle = new Bundle();
             dataBundle.putString("username", username);
+            dataBundle.putString("state", "normal");
             if (intent1 != null) {
                 intent1.putExtras(dataBundle);
                 startActivity(intent1);
@@ -306,6 +307,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .setContentText(message);
         Intent resultIntent = new Intent(MainActivity.this, ActivityToOpen);
         resultIntent.putExtra("username", username);
+        resultIntent.putExtra("state", "card");
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(MainActivity.this);
         stackBuilder.addParentStack(ActivityToOpen);
         stackBuilder.addNextIntent(resultIntent);

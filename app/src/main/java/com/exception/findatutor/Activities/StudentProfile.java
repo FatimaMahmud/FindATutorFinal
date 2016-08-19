@@ -25,7 +25,8 @@ public class StudentProfile extends Activity {
     private Button shareContact;
     private ProgressDialog progressDialog;
     private MongoDB mongoDB;
-    private static String username = null;
+    private String username = null;
+    private String state = null;
     private Bundle dataBundle;
     private int count = 0;
 
@@ -48,6 +49,7 @@ public class StudentProfile extends Activity {
 
         dataBundle = getIntent().getExtras();
         username = dataBundle.getString("username");
+        state = dataBundle.getString("state");
         name.setText(username);
         Toast.makeText(StudentProfile.this, "Username is: " + username, Toast.LENGTH_SHORT).show();
 
@@ -57,16 +59,20 @@ public class StudentProfile extends Activity {
         } else {
             new StudentProfile.getFromUsers(username).execute();
         }
-        shareContact.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new onClickButton().execute();
-                Intent intent = new Intent(StudentProfile.this, MainActivity.class);
-                intent.putExtra("username", LoginActivity.uname);
-                startActivity(intent);
-            }
-        });
-
+        if (state.equals("card")) {
+            shareContact.setVisibility(View.VISIBLE);
+            shareContact.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new onClickButton().execute();
+                    Intent intent = new Intent(StudentProfile.this, MainActivity.class);
+                    intent.putExtra("username", LoginActivity.uname);
+                    startActivity(intent);
+                }
+            });
+        }
+        else if (state.equals("normal"))
+            shareContact.setVisibility(View.INVISIBLE);
 
     }
 

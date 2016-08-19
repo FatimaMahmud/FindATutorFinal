@@ -37,6 +37,7 @@ public class ProfileActivity extends Activity {
     private MongoDB mongoDB;
     private static String username = null;
     private Bundle dataBundle;
+    private String state = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,7 @@ public class ProfileActivity extends Activity {
 
         dataBundle = getIntent().getExtras();
         username = dataBundle.getString("username");
+        state = dataBundle.getString("state");
         name.setText(username);
         new RetriveTHATUser().execute();
         phoneno.setOnClickListener(new View.OnClickListener() {
